@@ -1,14 +1,11 @@
 // Alternar abas do menu superior
 function switchTab(tabId) {
-  // Esconde todas as seções de conteúdo
   const contents = document.querySelectorAll('.tab-content');
   contents.forEach(content => content.classList.add('hidden'));
 
-  // Remove a classe ativa de todos os botões
   const buttons = document.querySelectorAll('.tab-btn');
   buttons.forEach(btn => btn.classList.remove('active'));
 
-  // Mostra a seção selecionada e ativa o botão correspondente
   const targetSection = document.getElementById(`sec-${tabId}`);
   if (targetSection) {
     targetSection.classList.remove('hidden');
@@ -43,36 +40,97 @@ function setSampleToxicity(id) {
 }
 
 function analyzeToxicity() {
-  const text = document.getElementById('toxicity-text').value;
+  const textInput = document.getElementById('toxicity-text').value.trim();
   const output = document.getElementById('toxicity-output');
 
-  if (!text.trim()) {
+  if (!textInput) {
     showToast("Por favor, digite ou selecione uma mensagem para analisar.", "warning");
     return;
   }
 
   output.innerHTML = `
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
-      <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--rose-main);"></i>
-      <p style="font-size: 0.875rem; color: var(--text-muted);">Analisando padrões de agressão verbal e risco...</p>
+      <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--cyan-main);"></i>
+      <p style="font-size: 0.875rem; color: var(--text-muted);">Analisando o teor da mensagem com IA heurística...</p>
     </div>
   `;
 
   setTimeout(() => {
-    output.innerHTML = `
-      <div style="width: 100%;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-          <strong style="color: var(--rose-main); font-size: 0.95rem;">Risco Alto Detectado (88%)</strong>
-          <span style="font-size: 0.75rem; background: rgba(244, 63, 94, 0.2); color: var(--rose-main); padding: 0.2rem 0.5rem; border-radius: 9999px;">Ameaça / Chantagem</span>
+    const lowerText = textInput.toLowerCase();
+
+    // Palavras que indicam perigo alto (ameaças, vazamentos, chantagem)
+    const highRiskWords = [
+      "divulgar", "endereço", "fotos", "chantagem", "vazar", "ameaça", 
+      "matar", "apanhar", "roubar", "hackear", "acabar com você", "passa o link"
+    ];
+
+    // Palavras que indicam toxicidade moderada (exclusão, hostilidade, insultos leves)
+    const mediumRiskWords = [
+      "sumir", "odeio", "idiota", "lixo", "ninguém gosta", "escroto", 
+      "inútil", "horroroso", "chato", "cala a boca", "sai daqui", "otário"
+    ];
+
+    let highMatches = 0;
+    let mediumMatches = 0;
+
+    highRiskWords.forEach(word => {
+      if (lowerText.includes(word)) highMatches++;
+    });
+
+    mediumRiskWords.forEach(word => {
+      if (lowerText.includes(word)) mediumMatches++;
+    });
+
+    // Classificação baseada nas ocorrências
+    if (highMatches > 0) {
+      // Risco Alto
+      output.innerHTML = `
+        <div style="width: 100%;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+            <strong style="color: var(--rose-main); font-size: 0.95rem;">Risco Alto Detectado (92%)</strong>
+            <span style="font-size: 0.75rem; background: rgba(244, 63, 94, 0.2); color: var(--rose-main); padding: 0.2rem 0.5rem; border-radius: 9999px;">Ameaça / Chantagem</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 1rem;">O texto contém indícios severos de coerção, intimidação ou exposição de dados.</p>
+          <div style="background: rgba(2, 6, 23, 0.5); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
+            <strong>Recomendação:</strong> Tire prints imediatos com data e link, bloqueie o perfil e denuncie às autoridades ou canais de ajuda.
+          </div>
         </div>
-        <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 1rem;">O texto contém indícios fortes de coerção, intimidação e violação de privacidade.</p>
-        <div style="background: rgba(2, 6, 23, 0.5); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
-          <strong>Recomendação:</strong> Tire capturas de tela (prints) com URL e data, bloqueie o usuário imediatamente e não ceda a chantagens.
+      `;
+      showToast("Alerta: Risco alto identificado!", "warning");
+
+    } else if (mediumMatches > 0) {
+      // Risco Moderado
+      output.innerHTML = `
+        <div style="width: 100%;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+            <strong style="color: var(--amber-main); font-size: 0.95rem;">Risco Moderado (64%)</strong>
+            <span style="font-size: 0.75rem; background: rgba(245, 158, 11, 0.2); color: var(--amber-main); padding: 0.2rem 0.5rem; border-radius: 9999px;">Hostilidade / Exclusão</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 1rem;">Identificamos termos agressivos ou tentativas de isolamento social (bullying).</p>
+          <div style="background: rgba(2, 6, 23, 0.5); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
+            <strong>Recomendação:</strong> Evite retrucar para não alimentar o conflito. Considere silenciar ou restringir a interação.
+          </div>
         </div>
-      </div>
-    `;
-    showToast("Análise concluída com sucesso!", "success");
-  }, 1200);
+      `;
+      showToast("Atenção: Comportamento hostil detectado.", "warning");
+
+    } else {
+      // Seguro / Risco Baixo
+      output.innerHTML = `
+        <div style="width: 100%;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+            <strong style="color: var(--emerald-main); font-size: 0.95rem;">Mensagem Segura (Risco Baixo - 4%)</strong>
+            <span style="font-size: 0.75rem; background: rgba(16, 185, 129, 0.2); color: var(--emerald-main); padding: 0.2rem 0.5rem; border-radius: 9999px;">Conteúdo Saudável / Neutro</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 1rem;">Nenhum padrão de hostilidade, xingamento ou coerção foi detectado.</p>
+          <div style="background: rgba(2, 6, 23, 0.5); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
+            <strong>Status:</strong> Ambiente virtual seguro e sem incidência de cyberbullying.
+          </div>
+        </div>
+      `;
+      showToast("Análise concluída: Conteúdo seguro!", "success");
+    }
+  }, 1000);
 }
 
 // Simulador de Scanner de Link / Arquivo
