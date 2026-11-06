@@ -7,14 +7,8 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    .hidden {
-      display: none !important;
-    }
-  </style>
 </head>
 <body>
-<a href="https://canva.link/d8l0zrasa17lsni" class="btn-link" target="_blank">Apresentação do Canva</a>
   <header class="app-header">
     <div class="container nav-wrapper">
       <div class="brand-logo">
@@ -23,11 +17,12 @@
         </div>
         <div>
           <span class="brand-title">SafeMercy</span>
-          <span class="brand-badge">Moderação e Proteção</span>
+          <span class="brand-badge">
+            <a href="https://canva.link/d8l0zrasa17lsni" class="btn-link" target="_blank" style="color: #ffffff;">Apresentação do Canva</a>
+          </span>
         </div>
       </div>
       
-    
       <nav class="nav-tabs">
         <button onclick="switchTab('scanner')" id="tab-scanner" class="tab-btn active">
           <i class="fa-solid fa-virus-slash" style="color: var(--cyan-main);"></i>Scanner Antivírus
@@ -40,12 +35,10 @@
         </button>
       </nav>
 
-
       <button onclick="toggleMobileMenu()" class="mobile-menu-btn">
         <i class="fa-solid fa-bars"></i>
       </button>
     </div>
-
 
     <div id="mobile-menu" class="mobile-nav">
       <button onclick="switchTab('scanner'); toggleMobileMenu()">
@@ -62,7 +55,6 @@
 
   <main class="container" style="padding-top: 2rem; padding-bottom: 2rem; flex: 1;">
     
-   
     <section class="banner-card">
       <div class="banner-watermark">
         <i class="fa-solid fa-shield-cat"></i>
@@ -82,7 +74,6 @@
         </p>
       </div>
     </section>
-
 
     <section id="sec-scanner" class="tab-content">
       <div class="grid-3col">
@@ -113,7 +104,6 @@
             </div>
           </div>
 
-    
           <div id="scan-progress" class="scan-progress-box hidden">
             <div style="display: flex; justify-content: space-between; font-size: 0.875rem;">
               <span id="scan-status-text" style="color: var(--cyan-main); font-weight: 500;">
@@ -125,9 +115,8 @@
               <div id="scan-bar" class="progress-bar-fill"></div>
             </div>
             <div id="scan-log" class="scan-log"></div>
-         </div>
+          </div>
 
-    
           <div id="scan-result" class="hidden"></div>
         </div>
 
@@ -187,7 +176,6 @@
             </button>
           </div>
 
-    
           <div id="toxicity-output" class="output-console" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <div style="width: 4rem; height: 4rem; border-radius: 9999px; background-color: var(--bg-main); display: flex; align-items: center; justify-content: center; color: var(--text-muted); margin-bottom: 0.75rem;">
               <i class="fa-solid fa-comment-dots" style="font-size: 1.75rem;"></i>
@@ -197,7 +185,6 @@
         </div>
       </div>
     </section>
-
 
     <section id="sec-education" class="tab-content hidden">
       <div class="grid-2col">
@@ -253,188 +240,6 @@
     <span id="toast-msg" style="font-size: 0.875rem; font-weight: 500;"></span>
   </div>
 
-  <script>
-    const apiKey = "";
-
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-
-      const targetSection = document.getElementById(`sec-${tabId}`);
-      if (targetSection) {
-        targetSection.classList.remove('hidden');
-      }
-      
-      const activeBtn = document.getElementById(`tab-${tabId}`);
-      if(activeBtn) {
-        activeBtn.classList.add('active');
-      }
-    }
-
-    function toggleMobileMenu() {
-      const menu = document.getElementById('mobile-menu');
-      if (menu) menu.classList.toggle('open');
-    }
-
-    function showToast(message, type = 'info') {
-      const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toast-msg');
-      const toastIcon = document.getElementById('toast-icon');
-      if (!toast) return;
-
-      toastMsg.innerText = message;
-      if(type === 'error') {
-        toastIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color: var(--rose-main);"></i>';
-      } else if(type === 'success') {
-        toastIcon.innerHTML = '<i class="fa-solid fa-circle-check" style="color: var(--emerald-main);"></i>';
-      } else {
-        toastIcon.innerHTML = '<i class="fa-solid fa-info-circle" style="color: var(--cyan-main);"></i>';
-      }
-
-      toast.classList.add('show');
-      setTimeout(() => { toast.classList.remove('show'); }, 4000);
-    }
-
-
-    function handleFileSelect(event) {
-      const file = event.target.files[0];
-      if (file) runAntivirusScan(file.name);
-    }
-
-    function startUrlScan() {
-      const url = document.getElementById('url-input').value.trim();
-      if(!url) {
-        showToast('Cole uma URL para executar a verificação.', 'error');
-        return;
-      }
-      runAntivirusScan(url);
-    }
-
-    function runAntivirusScan(targetName) {
-      const progressBox = document.getElementById('scan-progress');
-      const progressBar = document.getElementById('scan-bar');
-      const percentageText = document.getElementById('scan-percentage');
-      const logContainer = document.getElementById('scan-log');
-      const resultBox = document.getElementById('scan-result');
-
-      progressBox.classList.remove('hidden');
-      resultBox.classList.add('hidden');
-      progressBar.style.width = '0%';
-      percentageText.innerText = '0%';
-      logContainer.innerHTML = '';
-
-      const logs = [
-        `[INÍCIO] Inicializando motor heurístico CyberGuard...`,
-        `[HASH] Analisando assinaturas digitais de ${targetName}...`,
-        `[DATABASE] Verificando base de malwares conhecidos...`,
-        `[CONCLUÍDO] Consolidando relatório de integridade...`
-      ];
-
-      let step = 0;
-      const interval = setInterval(() => {
-        step++;
-        const percent = Math.min(step * 25, 100);
-        progressBar.style.width = `${percent}%`;
-        percentageText.innerText = `${Math.round(percent)}%`;
-
-        if (logs[step - 1]) {
-          const logEntry = document.createElement('div');
-          logEntry.innerText = logs[step - 1];
-          logContainer.appendChild(logEntry);
-        }
-
-        if (step >= 4) {
-          clearInterval(interval);
-          setTimeout(() => {
-            progressBox.classList.add('hidden');
-            renderScanResult(targetName);
-          }, 400);
-        }
-      }, 300);
-    }
-
-    function renderScanResult(targetName) {
-      const resultBox = document.getElementById('scan-result');
-      resultBox.classList.remove('hidden');
-      const lower = targetName.toLowerCase();
-      const isSuspicious = lower.includes('hack') || lower.includes('.exe') || lower.includes('.scr');
-
-      if (isSuspicious) {
-        resultBox.className = "scan-result-card result-danger";
-        resultBox.innerHTML = `
-          <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.5rem; color: var(--rose-main);"></i>
-          <div>
-            <h4 style="font-weight: 700;">Ameaça Encontrada! (${targetName})</h4>
-            <p style="font-size: 0.75rem; margin-top: 0.25rem;">Possível código malicioso associado ao roubo de credenciais.</p>
-          </div>`;
-      } else {
-        resultBox.className = "scan-result-card result-safe";
-        resultBox.innerHTML = `
-          <i class="fa-solid fa-shield-check" style="font-size: 1.5rem; color: var(--emerald-main);"></i>
-          <div>
-            <h4 style="font-weight: 700;">Nenhum Vírus Detectado (${targetName})</h4>
-            <p style="font-size: 0.75rem; margin-top: 0.25rem;">O arquivo passou nas verificações de segurança.</p>
-          </div>`;
-      }
-    }
-
-
-    function setSampleToxicity(type) {
-      const textEl = document.getElementById('toxicity-text');
-      if (type === 1) textEl.value = "Descobri sua escola e seu IP. Se você não me enviar sua senha, vou postar seus dados...";
-      else if (type === 2) textEl.value = "Ninguém te quer neste grupo. Vamos banir você e ridicularizar seu perfil.";
-      else if (type === 3) textEl.value = "Tenho arquivos privados do seu computador. Se não fizer o que mandei, publicarei tudo.";
-    }
-
-    async function analyzeToxicity() {
-      const text = document.getElementById('toxicity-text').value.trim();
-      const outputContainer = document.getElementById('toxicity-output');
-      const btn = document.getElementById('btn-analyze-tox');
-
-      if (!text) {
-        showToast('Insira uma mensagem para proceder com a análise.', 'error');
-        return;
-      }
-
-      btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processando com IA...`;
-
-      const systemPrompt = `Você é um especialista em Segurança Digital e Psicologia de Defesa contra Cyberbullying. Responda em HTML simples (usando <p>, <strong>, <ul>, <li>) avaliando o risco e orientando a vítima.`;
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-      try {
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: `Analise este texto: "${text}"` }] }],
-            systemInstruction: { parts: [{ text: systemPrompt }] }
-          })
-        });
-
-        const data = await response.json();
-        const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (aiResponse) {
-          outputContainer.style.alignItems = 'flex-start';
-          outputContainer.style.textAlign = 'left';
-          outputContainer.innerHTML = `
-            <div style="color: var(--rose-main); font-weight: 700; margin-bottom: 0.75rem; font-size: 0.875rem;">
-              <i class="fa-solid fa-shield-heart" style="margin-right: 0.25rem;"></i> Relatório de Toxicidade Gemini IA
-            </div>
-            <div style="font-size: 0.8rem; line-height: 1.6; color: var(--text-sub);">
-              ${aiResponse.replace(/\n/g, '<br>')}
-            </div>`;
-        } else {
-          throw new Error('Sem resposta da API.');
-        }
-      } catch (err) {
-        outputContainer.innerHTML = `<p style="color: var(--rose-main); font-size: 0.875rem;">Erro ao conectar com a IA. Verifique se inseriu a chave da API do Gemini.</p>`;
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-microchip"></i> Analisar Mensagem com IA`;
-      }
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
